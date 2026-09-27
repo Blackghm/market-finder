@@ -157,7 +157,22 @@
         <div class="route"></div>
       </div>
     </section>
+<section class="card">
+  <h2>Meine Einkaufsliste</h2>
 
+  <div class="product-buttons">
+    <button type="button" onclick="addProduct('Körnerbrot')">+ Körnerbrot</button>
+    <button type="button" onclick="addProduct('Spaghetti')">+ Spaghetti</button>
+    <button type="button" onclick="addProduct('Äpfel')">+ Äpfel</button>
+    <button type="button" onclick="addProduct('H-Milch 1,5 %')">+ Milch</button>
+    <button type="button" onclick="addProduct('Pizza')">+ Pizza</button>
+  </div>
+
+  <p id="shopping-list">Noch keine Produkte ausgewählt.</p>
+</section>
+
+<section class="card">
+  <span class="route-label">Nächster Stopp</span>
     <section class="card">
       <span class="route-label">Nächster Stopp</span>
       <h2 class="next-stop">Brot &amp; Brotzubehör</h2>
@@ -205,7 +220,16 @@
   ];
 
   let currentStop = 0;
+let shoppingList = [];
 
+function addProduct(product) {
+  if (!shoppingList.includes(product)) {
+    shoppingList.push(product);
+  }
+
+  document.getElementById("shopping-list").textContent =
+    "Ausgewählt: " + shoppingList.join(" · ");
+}
   function showStop() {
     const stop = stops[currentStop];
 
