@@ -162,10 +162,55 @@
       <span class="route-label">Nächster Stopp</span>
       <h2 class="next-stop">Brot &amp; Brotzubehör</h2>
       <p class="products">Körnerbrot · Tortillas</p>
- <button onclick="alert('Brot & Brotzubehör erledigt! Als Nächstes: Nudeln.')">
-  Stopp erledigt
-</button>
+ <button onclick="nextStop()">Stopp erledigt</button>
     </section>
   </main>
-</body>
+<script>
+  const stops = [
+    {
+      area: "Brot & Brotzubehör",
+      products: "Körnerbrot · Tortillas"
+    },
+    {
+      area: "Nudeln",
+      products: "Spaghetti · Tomatensoße"
+    },
+    {
+      area: "Obst & Gemüse",
+      products: "Äpfel"
+    },
+    {
+      area: "Kühlregal",
+      products: "H-Milch 1,5 %"
+    },
+    {
+      area: "Getränke & Pfandrückgabe",
+      products: "Pfand abgeben"
+    },
+    {
+      area: "Tiefkühlprodukte",
+      products: "Pizza"
+    },
+    {
+      area: "Kasse",
+      products: "Einkauf abschließen"
+    }
+  ];
+
+  let currentStop = 0;
+
+  function nextStop() {
+    currentStop++;
+
+    if (currentStop >= stops.length) {
+      document.querySelector(".next-stop").textContent = "Einkauf abgeschlossen";
+      document.querySelector(".products").textContent = "Deine Route endet an der Kasse.";
+      document.querySelector("button").textContent = "Fertig";
+      return;
+    }
+
+    document.querySelector(".next-stop").textContent = stops[currentStop].area;
+    document.querySelector(".products").textContent = stops[currentStop].products;
+  }
+</script></body>
 </html>
