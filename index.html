@@ -227,8 +227,22 @@ function addProduct(product) {
     shoppingList.push(product);
   }
 
-  document.getElementById("shopping-list").textContent =
-    "Ausgewählt: " + shoppingList.join(" · ");
+  document.getElementById("shopping-list").innerHTML =
+  shoppingList.map(function(product) {
+    return '<button type="button" class="selected-product" onclick="removeProduct(\'' + product + '\')">' +
+      product + ' ×</button>';
+  }).join("");
+}
+  function removeProduct(product) {
+  shoppingList = shoppingList.filter(function(item) {
+    return item !== product;
+  });
+
+  document.getElementById("shopping-list").innerHTML =
+    shoppingList.map(function(item) {
+      return '<button type="button" class="selected-product" onclick="removeProduct(\'' + item + '\')">' +
+        item + ' ×</button>';
+    }).join("");
 }
   function showStop() {
     const stop = stops[currentStop];
