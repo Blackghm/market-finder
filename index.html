@@ -138,17 +138,17 @@
     <section class="card">
       <div class="map" aria-label="Vereinfachte Marktkarte">
         <div class="zone entrance" style="left: 41%; bottom: 1%; width: 20%; height: 10%;">Eingang</div>
-        <div class="zone checkout" style="left: 2%; bottom: 1%; width: 25%; height: 10%;">Kasse</div>
+        <div class="zone checkout"data-zone="kasse" style="left: 2%; bottom: 1%; width: 25%; height: 10%;">Kasse</div>
 
-        <div class="zone highlight" style="left: 60%; bottom: 13%; width: 28%; height: 12%;">Brot &amp; Brotzubehör</div>
-        <div class="zone" style="right: 2%; top: 10%; width: 18%; height: 59%;">Kühlung</div>
-        <div class="zone" style="right: 2%; top: 2%; width: 18%; height: 7%;">Getränke</div>
+        <div class="zone highlight"data-zone="brot" style="left: 60%; bottom: 13%; width: 28%; height: 12%;">Brot &amp; Brotzubehör</div>
+        <div class="zone"data-zone="kuehlung" style="right: 2%; top: 10%; width: 18%; height: 59%;">Kühlung</div>
+        <div class="zone"data-zone="getraenke" style="right: 2%; top: 2%; width: 18%; height: 7%;">Getränke</div>
         <div class="zone" style="right: 21%; top: 2%; width: 18%; height: 7%;">Fleisch</div>
-        <div class="zone" style="left: 2%; top: 2%; width: 18%; height: 11%;">Obst &amp; Gemüse</div>
-        <div class="zone" style="left: 2%; top: 16%; width: 18%; height: 53%;">Tiefkühlung</div>
+        <div class="zone"data-zone="obst" style="left: 2%; top: 2%; width: 18%; height: 11%;">Obst &amp; Gemüse</div>
+        <div class="zone"data-zone="tiefkuehlung" style="left: 2%; top: 16%; width: 18%; height: 53%;">Tiefkühlung</div>
 
         <div class="zone" style="left: 26%; top: 12%; width: 15%; height: 18%;">Kaffee &amp; Müsli</div>
-        <div class="zone" style="left: 44%; top: 12%; width: 15%; height: 18%;">Nudeln</div>
+        <div class="zone"data-zone="nudeln" style="left: 44%; top: 12%; width: 15%; height: 18%;">Nudeln</div>
         <div class="zone" style="left: 26%; top: 34%; width: 15%; height: 18%;">Konserven</div>
         <div class="zone" style="left: 44%; top: 34%; width: 15%; height: 18%;">Soßen</div>
         <div class="zone" style="left: 26%; top: 56%; width: 15%; height: 18%;">Süßes</div>
@@ -166,7 +166,43 @@
     </section>
   </main>
 <script>
-  const stops = [
+const stops = [
+  {
+    area: "Brot & Brotzubehör",
+    products: "Körnerbrot · Tortillas",
+    zone: "brot"
+  },
+  {
+    area: "Nudeln",
+    products: "Spaghetti · Tomatensoße",
+    zone: "nudeln"
+  },
+  {
+    area: "Obst & Gemüse",
+    products: "Äpfel",
+    zone: "obst"
+  },
+  {
+    area: "Kühlregal",
+    products: "H-Milch 1,5 %",
+    zone: "kuehlung"
+  },
+  {
+    area: "Getränke & Pfandrückgabe",
+    products: "Pfand abgeben",
+    zone: "getraenke"
+  },
+  {
+    area: "Tiefkühlprodukte",
+    products: "Pizza",
+    zone: "tiefkuehlung"
+  },
+  {
+    area: "Kasse",
+    products: "Einkauf abschließen",
+    zone: "kasse"
+  }
+];
     {
       area: "Brot & Brotzubehör",
       products: "Körnerbrot · Tortillas"
@@ -199,7 +235,31 @@
 
   let currentStop = 0;
 
-  function nextStop() {
+ function nextStop() {
+  currentStop++;
+
+  if (currentStop >= stops.length) {
+    document.querySelector(".next-stop").textContent = "Einkauf abgeschlossen";
+    document.querySelector(".products").textContent = "Deine Route endet an der Kasse.";
+    document.querySelector("button").textContent = "Fertig";
+    return;
+  }
+
+  document.querySelector(".next-stop").textContent = stops[currentStop].area;
+  document.querySelector(".products").textContent = stops[currentStop].products;
+
+  document.querySelectorAll(".zone").forEach(function(zone) {
+    zone.classList.remove("highlight");
+  });
+
+  const activeZone = document.querySelector(
+    '[data-zone="' + stops[currentStop].zone + '"]'
+  );
+
+  if (activeZone) {
+    activeZone.classList.add("highlight");
+  }
+}
     currentStop++;
 
     if (currentStop >= stops.length) {
