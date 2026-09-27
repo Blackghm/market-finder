@@ -166,112 +166,85 @@
     </section>
   </main>
 <script>
-const stops = [
-  {
-    area: "Brot & Brotzubehör",
-    products: "Körnerbrot · Tortillas",
-    zone: "brot"
-  },
-  {
-    area: "Nudeln",
-    products: "Spaghetti · Tomatensoße",
-    zone: "nudeln"
-  },
-  {
-    area: "Obst & Gemüse",
-    products: "Äpfel",
-    zone: "obst"
-  },
-  {
-    area: "Kühlregal",
-    products: "H-Milch 1,5 %",
-    zone: "kuehlung"
-  },
-  {
-    area: "Getränke & Pfandrückgabe",
-    products: "Pfand abgeben",
-    zone: "getraenke"
-  },
-  {
-    area: "Tiefkühlprodukte",
-    products: "Pizza",
-    zone: "tiefkuehlung"
-  },
-  {
-    area: "Kasse",
-    products: "Einkauf abschließen",
-    zone: "kasse"
-  }
-];
+  const stops = [
     {
       area: "Brot & Brotzubehör",
-      products: "Körnerbrot · Tortillas"
+      products: "Körnerbrot · Tortillas",
+      zone: "brot"
     },
     {
       area: "Nudeln",
-      products: "Spaghetti · Tomatensoße"
+      products: "Spaghetti · Tomatensoße",
+      zone: "nudeln"
     },
     {
       area: "Obst & Gemüse",
-      products: "Äpfel"
+      products: "Äpfel",
+      zone: "obst"
     },
     {
       area: "Kühlregal",
-      products: "H-Milch 1,5 %"
+      products: "H-Milch 1,5 %",
+      zone: "kuehlung"
     },
     {
       area: "Getränke & Pfandrückgabe",
-      products: "Pfand abgeben"
+      products: "Pfand abgeben",
+      zone: "getraenke"
     },
     {
       area: "Tiefkühlprodukte",
-      products: "Pizza"
+      products: "Pizza",
+      zone: "tiefkuehlung"
     },
     {
       area: "Kasse",
-      products: "Einkauf abschließen"
+      products: "Einkauf abschließen",
+      zone: "kasse"
     }
   ];
 
   let currentStop = 0;
 
- function nextStop() {
-  currentStop++;
+  function showStop() {
+    const stop = stops[currentStop];
 
-  if (currentStop >= stops.length) {
-    document.querySelector(".next-stop").textContent = "Einkauf abgeschlossen";
-    document.querySelector(".products").textContent = "Deine Route endet an der Kasse.";
-    document.querySelector("button").textContent = "Fertig";
-    return;
+    document.querySelector(".next-stop").textContent = stop.area;
+    document.querySelector(".products").textContent = stop.products;
+
+    document.querySelectorAll(".zone").forEach(function (zone) {
+      zone.classList.remove("highlight");
+    });
+
+    const activeZone = document.querySelector(
+      '[data-zone="' + stop.zone + '"]'
+    );
+
+    if (activeZone) {
+      activeZone.classList.add("highlight");
+    }
   }
 
-  document.querySelector(".next-stop").textContent = stops[currentStop].area;
-  document.querySelector(".products").textContent = stops[currentStop].products;
-
-  document.querySelectorAll(".zone").forEach(function(zone) {
-    zone.classList.remove("highlight");
-  });
-
-  const activeZone = document.querySelector(
-    '[data-zone="' + stops[currentStop].zone + '"]'
-  );
-
-  if (activeZone) {
-    activeZone.classList.add("highlight");
-  }
-}
+  function nextStop() {
     currentStop++;
 
     if (currentStop >= stops.length) {
       document.querySelector(".next-stop").textContent = "Einkauf abgeschlossen";
-      document.querySelector(".products").textContent = "Deine Route endet an der Kasse.";
+      document.querySelector(".products").textContent =
+        "Deine Route endet an der Kasse.";
       document.querySelector("button").textContent = "Fertig";
+
+      document.querySelectorAll(".zone").forEach(function (zone) {
+        zone.classList.remove("highlight");
+      });
+
       return;
     }
 
-    document.querySelector(".next-stop").textContent = stops[currentStop].area;
-    document.querySelector(".products").textContent = stops[currentStop].products;
+    showStop();
   }
+
+  showStop();
 </script>
 </body>
 </html>
