@@ -128,6 +128,52 @@
     button:hover {
       background: #1056ba;
     }
+    .product-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.product-buttons button {
+  background-color: #e4f5e7;
+  color: #1d5c2a;
+  border: 1px solid #74a87c;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.product-buttons button:hover {
+  background-color: #ccebd1;
+}
+
+.shopping-hint {
+  margin: 0 0 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+#shopping-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+
+.selected-product {
+  background-color: #f2f2f2;
+  color: #8b1e1e;
+  border: 1px solid #d6a4a4;
+  border-radius: 999px;
+  padding: 7px 11px;
+  cursor: pointer;
+}
+
+.selected-product:hover {
+  background-color: #fde3e3;
+}
   </style>
 </head>
 <body>
@@ -167,7 +213,7 @@
     <button type="button" onclick="addProduct('H-Milch 1,5 %')">+ Milch</button>
     <button type="button" onclick="addProduct('Pizza')">+ Pizza</button>
   </div>
-
+<p class="shopping-hint">Ausgewählte Produkte zum Entfernen anklicken:</p>
   <p id="shopping-list">Noch keine Produkte ausgewählt.</p>
 </section>
 
