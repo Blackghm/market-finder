@@ -197,6 +197,11 @@
   border-radius: 8px;
   font-size: 16px;
 }
+    .no-products-message {
+  margin: 0 0 14px;
+  color: #666;
+  font-style: italic;
+}
   </style>
 </head>
 <body>
@@ -245,6 +250,7 @@
   <option value="Tiefkühl">Tiefkühl</option>
 </select>
  <div id="product-buttons" class="product-buttons"></div>
+  <p id="no-products-message" class="no-products-message"></p>
 <p class="shopping-hint">Ausgewählte Produkte zum Entfernen anklicken:</p>
   <p id="shopping-list">Noch keine Produkte ausgewählt.</p>
   <button type="button" class="clear-list-button" onclick="clearShoppingList()">Liste leeren</button>
@@ -308,7 +314,18 @@
 ];
 
 function showProductButtons(productList) {
-  document.getElementById("product-buttons").innerHTML =
+  const buttonArea = document.getElementById("product-buttons");
+  const messageArea = document.getElementById("no-products-message");
+
+  if (productList.length === 0) {
+    buttonArea.innerHTML = "";
+    messageArea.textContent = "Kein Produkt gefunden.";
+    return;
+  }
+
+  messageArea.textContent = "";
+
+  buttonArea.innerHTML =
     productList.map(function(product) {
       return '<button type="button" onclick="addProduct(\'' + product.name + '\')">' +
         '+ ' + product.name + '</button>';
