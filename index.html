@@ -174,6 +174,19 @@
 .selected-product:hover {
   background-color: #fde3e3;
 }
+    .clear-list-button {
+  margin-top: 14px;
+  background-color: #fff;
+  color: #8b1e1e;
+  border: 1px solid #d6a4a4;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.clear-list-button:hover {
+  background-color: #fde3e3;
+}
   </style>
 </head>
 <body>
@@ -215,6 +228,7 @@
   </div>
 <p class="shopping-hint">Ausgewählte Produkte zum Entfernen anklicken:</p>
   <p id="shopping-list">Noch keine Produkte ausgewählt.</p>
+  <button type="button" class="clear-list-button" onclick="clearShoppingList()">Liste leeren</button>
 </section>
 
 <section class="card">
@@ -289,6 +303,11 @@ localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
       return '<button type="button" class="selected-product" onclick="removeProduct(\'' + item + '\')">' +
         item + ' ×</button>';
     }).join("");
+}
+  function clearShoppingList() {
+  shoppingList = [];
+  localStorage.removeItem("shoppingList");
+  showShoppingList();
 }
   function showStop() {
     const stop = stops[currentStop];
