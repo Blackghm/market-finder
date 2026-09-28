@@ -187,6 +187,16 @@
 .clear-list-button:hover {
   background-color: #fde3e3;
 }
+    #product-search,
+#category-filter {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 6px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #b8b8b8;
+  border-radius: 8px;
+  font-size: 16px;
+}
   </style>
 </head>
 <body>
@@ -218,6 +228,13 @@
     </section>
 <section class="card">
   <h2>Meine Einkaufsliste</h2>
+  <label for="product-search">Produkt suchen:</label>
+<input
+  id="product-search"
+  type="search"
+  placeholder="Zum Beispiel Spaghetti"
+  oninput="filterProducts()"
+>
 <label for="category-filter">Produktkategorie auswählen:</label>
 <select id="category-filter" onchange="filterProducts()">
   <option value="Alle">Alle Kategorien</option>
@@ -300,14 +317,16 @@ function showProductButtons(productList) {
 
 function filterProducts() {
   const selectedCategory = document.getElementById("category-filter").value;
-
-  if (selectedCategory === "Alle") {
-    showProductButtons(products);
-    return;
-  }
+  const searchText = document.getElementById("product-search").value.toLowerCase();
 
   const filteredProducts = products.filter(function(product) {
-    return product.category === selectedCategory;
+    const categoryMatches =
+      selectedCategory === "Alle" || product.category === selectedCategory;
+
+    const nameMatches =
+      product.name.toLowerCase().includes(searchText);
+
+    return categoryMatches && nameMatches;
   });
 
   showProductButtons(filteredProducts);
