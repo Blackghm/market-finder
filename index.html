@@ -305,12 +305,32 @@
   ];
 
   let currentStop = 0;
-  const products = [
-  { name: "Körnerbrot", category: "Brot und Backwaren" },
-  { name: "Spaghetti", category: "Nudeln" },
-  { name: "Äpfel", category: "Obst und Gemüse" },
-  { name: "H-Milch 1,5 %", category: "Milchprodukte" },
-  { name: "Pizza", category: "Tiefkühl" }
+ const products = [
+  {
+    name: "Körnerbrot",
+    category: "Brot und Backwaren",
+    marketArea: "Brot und Backwaren am Eingang"
+  },
+  {
+    name: "Spaghetti",
+    category: "Nudeln",
+    marketArea: "Nudeln und Konserven"
+  },
+  {
+    name: "Äpfel",
+    category: "Obst und Gemüse",
+    marketArea: "Obst und Gemüse hinten links"
+  },
+  {
+    name: "H-Milch 1,5 %",
+    category: "Milchprodukte",
+    marketArea: "Kühlregal an der Rückwand"
+  },
+  {
+    name: "Pizza",
+    category: "Tiefkühl",
+    marketArea: "Tiefkühlregal links vor der Kasse"
+  }
 ];
 
 function showProductButtons(productList) {
@@ -327,8 +347,8 @@ function showProductButtons(productList) {
 
   buttonArea.innerHTML =
     productList.map(function(product) {
-      return '<button type="button" onclick="addProduct(\'' + product.name + '\')">' +
-        '+ ' + product.name + '</button>';
+     return '<button type="button" onclick="addProduct(\'' + product.name + '\')">' +
+  '+ ' + product.name + ' · ' + product.marketArea + '</button>';
     }).join("");
 }
 
