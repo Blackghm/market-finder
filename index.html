@@ -219,13 +219,7 @@
 <section class="card">
   <h2>Meine Einkaufsliste</h2>
 
-  <div class="product-buttons">
-    <button type="button" onclick="addProduct('Körnerbrot')">+ Körnerbrot</button>
-    <button type="button" onclick="addProduct('Spaghetti')">+ Spaghetti</button>
-    <button type="button" onclick="addProduct('Äpfel')">+ Äpfel</button>
-    <button type="button" onclick="addProduct('H-Milch 1,5 %')">+ Milch</button>
-    <button type="button" onclick="addProduct('Pizza')">+ Pizza</button>
-  </div>
+ <div id="product-buttons" class="product-buttons"></div>
 <p class="shopping-hint">Ausgewählte Produkte zum Entfernen anklicken:</p>
   <p id="shopping-list">Noch keine Produkte ausgewählt.</p>
   <button type="button" class="clear-list-button" onclick="clearShoppingList()">Liste leeren</button>
@@ -280,6 +274,21 @@
   ];
 
   let currentStop = 0;
+  const products = [
+  { name: "Körnerbrot", category: "Brot und Backwaren" },
+  { name: "Spaghetti", category: "Nudeln" },
+  { name: "Äpfel", category: "Obst und Gemüse" },
+  { name: "H-Milch 1,5 %", category: "Milchprodukte" },
+  { name: "Pizza", category: "Tiefkühl" }
+];
+
+function showProductButtons() {
+  document.getElementById("product-buttons").innerHTML =
+    products.map(function(product) {
+      return '<button type="button" onclick="addProduct(\'' + product.name + '\')">' +
+        '+ ' + product.name + '</button>';
+    }).join("");
+}
 let shoppingList = JSON.parse(localStorage.getItem("shoppingList")) || [];
 
 function addProduct(product) {
@@ -353,6 +362,8 @@ document.getElementById("shopping-list").innerHTML =
     return '<button type="button" class="selected-product" onclick="removeProduct(\'' + product + '\')">' +
       product + ' ×</button>';
   }).join("");
+  showProductButtons();
+showShoppingList();
   showStop();
 </script>
 </body>
