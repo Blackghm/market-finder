@@ -202,6 +202,20 @@
   color: #666;
   font-style: italic;
 }
+    .route-box {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #dddddd;
+}
+
+.route-box h2 {
+  margin-top: 0;
+}
+
+#shopping-route {
+  margin-bottom: 0;
+  padding-left: 22px;
+}
   </style>
 </head>
 <body>
@@ -254,6 +268,10 @@
 <p class="shopping-hint">Ausgewählte Produkte zum Entfernen anklicken:</p>
   <p id="shopping-list">Noch keine Produkte ausgewählt.</p>
   <button type="button" class="clear-list-button" onclick="clearShoppingList()">Liste leeren</button>
+  <div class="route-box">
+  <h2>Deine Route</h2>
+  <ol id="shopping-route"></ol>
+</div>
 </section>
 
 <section class="card">
@@ -369,7 +387,30 @@ function filterProducts() {
   showProductButtons(filteredProducts);
 }
 let shoppingList = JSON.parse(localStorage.getItem("shoppingList")) || [];
+function showShoppingRoute() {
+  const routeElement = document.getElementById("shopping-route");
 
+  if (shoppingList.length === 0) {
+    routeElement.innerHTML = "<li>Füge Produkte zu deiner Liste hinzu.</li>";
+    return;
+  }
+
+  const routeAreas = shoppingList.map(function(productName) {
+    const product = products.find(function(item) {
+      return item.name === productName;
+    });
+
+    return product.marketArea;
+  });
+
+  const uniqueAreas = [...new Set(routeAreas)];
+
+  routeElement.innerHTML =
+    uniqueAreas.map(function(area) {
+      return "<li>" + area + "</li>";
+    }).join("") +
+    "<li>Kasse</li>";
+}
 function addProduct(product) {
   if (!shoppingList.includes(product)) {
     shoppingList.push(product);
@@ -398,6 +439,7 @@ localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
 
   document.getElementById("shopping-list").textContent =
     "Noch keine Produkte ausgewählt.";
+    showShoppingRoute();
 }
   function showStop() {
     const stop = stops[currentStop];
@@ -433,7 +475,7 @@ localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
 
       return;
     }
-
+showShoppingRoute();
     showStop();
   }
 document.getElementById("shopping-list").innerHTML =
@@ -443,6 +485,7 @@ document.getElementById("shopping-list").innerHTML =
   }).join("");
  showProductButtons(products);
 showShoppingList();
+  showShoppingRoute();
   showStop();
 </script>
 </body>
