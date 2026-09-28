@@ -307,7 +307,9 @@ localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
   function clearShoppingList() {
   shoppingList = [];
   localStorage.removeItem("shoppingList");
-  showShoppingList();
+
+  document.getElementById("shopping-list").textContent =
+    "Noch keine Produkte ausgewählt.";
 }
   function showStop() {
     const stop = stops[currentStop];
