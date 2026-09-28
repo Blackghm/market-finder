@@ -220,13 +220,13 @@
   ];
 
   let currentStop = 0;
-let shoppingList = [];
+let shoppingList = JSON.parse(localStorage.getItem("shoppingList")) || [];
 
 function addProduct(product) {
   if (!shoppingList.includes(product)) {
     shoppingList.push(product);
   }
-
+localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
   document.getElementById("shopping-list").innerHTML =
   shoppingList.map(function(product) {
     return '<button type="button" class="selected-product" onclick="removeProduct(\'' + product + '\')">' +
@@ -237,7 +237,7 @@ function addProduct(product) {
   shoppingList = shoppingList.filter(function(item) {
     return item !== product;
   });
-
+localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
   document.getElementById("shopping-list").innerHTML =
     shoppingList.map(function(item) {
       return '<button type="button" class="selected-product" onclick="removeProduct(\'' + item + '\')">' +
@@ -281,7 +281,11 @@ function addProduct(product) {
 
     showStop();
   }
-
+document.getElementById("shopping-list").innerHTML =
+  shoppingList.map(function(product) {
+    return '<button type="button" class="selected-product" onclick="removeProduct(\'' + product + '\')">' +
+      product + ' ×</button>';
+  }).join("");
   showStop();
 </script>
 </body>
