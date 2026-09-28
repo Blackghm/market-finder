@@ -218,7 +218,15 @@
     </section>
 <section class="card">
   <h2>Meine Einkaufsliste</h2>
-
+<label for="category-filter">Produktkategorie auswählen:</label>
+<select id="category-filter" onchange="filterProducts()">
+  <option value="Alle">Alle Kategorien</option>
+  <option value="Brot und Backwaren">Brot und Backwaren</option>
+  <option value="Nudeln">Nudeln</option>
+  <option value="Obst und Gemüse">Obst und Gemüse</option>
+  <option value="Milchprodukte">Milchprodukte</option>
+  <option value="Tiefkühl">Tiefkühl</option>
+</select>
  <div id="product-buttons" class="product-buttons"></div>
 <p class="shopping-hint">Ausgewählte Produkte zum Entfernen anklicken:</p>
   <p id="shopping-list">Noch keine Produkte ausgewählt.</p>
@@ -282,12 +290,27 @@
   { name: "Pizza", category: "Tiefkühl" }
 ];
 
-function showProductButtons() {
+function showProductButtons(productList) {
   document.getElementById("product-buttons").innerHTML =
-    products.map(function(product) {
+    productList.map(function(product) {
       return '<button type="button" onclick="addProduct(\'' + product.name + '\')">' +
         '+ ' + product.name + '</button>';
     }).join("");
+}
+
+function filterProducts() {
+  const selectedCategory = document.getElementById("category-filter").value;
+
+  if (selectedCategory === "Alle") {
+    showProductButtons(products);
+    return;
+  }
+
+  const filteredProducts = products.filter(function(product) {
+    return product.category === selectedCategory;
+  });
+
+  showProductButtons(filteredProducts);
 }
 let shoppingList = JSON.parse(localStorage.getItem("shoppingList")) || [];
 
@@ -362,7 +385,7 @@ document.getElementById("shopping-list").innerHTML =
     return '<button type="button" class="selected-product" onclick="removeProduct(\'' + product + '\')">' +
       product + ' ×</button>';
   }).join("");
-  showProductButtons();
+ showProductButtons(products);
 showShoppingList();
   showStop();
 </script>
