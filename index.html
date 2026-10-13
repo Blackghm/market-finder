@@ -242,7 +242,7 @@
         <div class="zone" style="left: 26%; top: 56%; width: 15%; height: 18%;">Süßes</div>
         <div class="zone" style="left: 44%; top: 56%; width: 15%; height: 18%;">Wein</div>
 
-        <div class="route"></div>
+      
       </div>
     </section>
 <section class="card">
@@ -276,107 +276,116 @@
 
 <section class="card">
   <span class="route-label">Nächster Stopp</span>
-    <section class="card">
-      <span class="route-label">Nächster Stopp</span>
-      <h2 class="next-stop">Brot &amp; Brotzubehör</h2>
-      <p class="products">Körnerbrot · Tortillas</p>
- <button onclick="nextStop()">Stopp erledigt</button>
-    </section>
+  <h2 class="next-stop">Noch keine Route</h2>
+  <p class="products">Wähle Produkte für deine Einkaufsliste aus.</p>
+  <button id="next-stop-button" type="button" onclick="nextStop()" disabled>
+    Stopp erledigt
+  </button>
+</section>
   </main>
 <script>
-  const stops = [
-    {
-      area: "Brot & Brotzubehör",
-      products: "Körnerbrot · Tortillas",
-      zone: "brot"
-    },
-    {
-      area: "Nudeln",
-      products: "Spaghetti · Tomatensoße",
-      zone: "nudeln"
-    },
-    {
-      area: "Obst & Gemüse",
-      products: "Äpfel",
-      zone: "obst"
-    },
-    {
-      area: "Kühlregal",
-      products: "H-Milch 1,5 %",
-      zone: "kuehlung"
-    },
-    {
-      area: "Getränke & Pfandrückgabe",
-      products: "Pfand abgeben",
-      zone: "getraenke"
-    },
-    {
-      area: "Tiefkühlprodukte",
-      products: "Pizza",
-      zone: "tiefkuehlung"
-    },
-    {
-      area: "Kasse",
-      products: "Einkauf abschließen",
-      zone: "kasse"
-    }
-  ];
-
-  let currentStop = 0;
- const products = [
+const products = [
   {
     name: "Körnerbrot",
     category: "Brot und Backwaren",
-    marketArea: "Brot und Backwaren am Eingang"
+    marketArea: "Brot und Backwaren am Eingang",
+    zone: "brot"
   },
   {
     name: "Spaghetti",
     category: "Nudeln",
-    marketArea: "Nudeln und Konserven"
+    marketArea: "Nudeln und Konserven",
+    zone: "nudeln"
   },
   {
     name: "Äpfel",
     category: "Obst und Gemüse",
-    marketArea: "Obst und Gemüse hinten links"
+    marketArea: "Obst und Gemüse hinten links",
+    zone: "obst"
   },
   {
     name: "H-Milch 1,5 %",
     category: "Milchprodukte",
-    marketArea: "Kühlregal an der Rückwand"
+    marketArea: "Kühlregal an der Rückwand",
+    zone: "kuehlung"
   },
   {
     name: "Pizza",
     category: "Tiefkühl",
-    marketArea: "Tiefkühlregal links vor der Kasse"
+    marketArea: "Tiefkühlregal links vor der Kasse",
+    zone: "tiefkuehlung"
   }
 ];
+
+// Vorläufige Reihenfolge nur für diesen Beispielmarkt.
+const marketZoneOrder = [
+  "brot",
+  "nudeln",
+  "kuehlung",
+  "obst",
+  "tiefkuehlung"
+];
+
+let shoppingList = [];
+let stops = [];
+let currentStop = 0;
+
+try {
+  const savedList = JSON.parse(localStorage.getItem("shoppingList"));
+
+  if (Array.isArray(savedList)) {
+    shoppingList = savedList.filter(function(name) {
+      return products.some(function(product) {
+        return product.name === name;
+      });
+    });
+
+    shoppingList = [...new Set(shoppingList)];
+  }
+} catch (error) {
+  console.warn("Einkaufsliste konnte nicht geladen werden.", error);
+}
+
+function saveShoppingList() {
+  try {
+    localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
+  } catch (error) {
+    console.warn("Einkaufsliste konnte nicht gespeichert werden.", error);
+  }
+}
 
 function showProductButtons(productList) {
   const buttonArea = document.getElementById("product-buttons");
   const messageArea = document.getElementById("no-products-message");
 
-  if (productList.length === 0) {
-    buttonArea.innerHTML = "";
-    messageArea.textContent = "Kein Produkt gefunden.";
-    return;
-  }
+  buttonArea.replaceChildren();
+  messageArea.textContent =
+    productList.length === 0 ? "Kein Produkt gefunden." : "";
 
-  messageArea.textContent = "";
+  productList.forEach(function(product) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "+ " + product.name + " · " + product.marketArea;
 
-  buttonArea.innerHTML =
-    productList.map(function(product) {
-     return '<button type="button" onclick="addProduct(\'' + product.name + '\')">' +
-  '+ ' + product.name + ' · ' + product.marketArea + '</button>';
-    }).join("");
+    button.addEventListener("click", function() {
+      addProduct(product.name);
+    });
+
+    buttonArea.appendChild(button);
+  });
 }
 
 function filterProducts() {
-  const selectedCategory = document.getElementById("category-filter").value;
-  const searchText = document.getElementById("product-search").value.toLowerCase();
+  const selectedCategory =
+    document.getElementById("category-filter").value;
+
+  const searchText =
+    document.getElementById("product-search").value.trim().toLowerCase();
 
   const filteredProducts = products.filter(function(product) {
     const categoryMatches =
-      selectedCategory === "Alle" || product.category === selectedCategory;
+      selectedCategory === "Alle" ||
+      product.category === selectedCategory;
 
     const nameMatches =
       product.name.toLowerCase().includes(searchText);
@@ -386,107 +395,173 @@ function filterProducts() {
 
   showProductButtons(filteredProducts);
 }
-let shoppingList = JSON.parse(localStorage.getItem("shoppingList")) || [];
-function showShoppingRoute() {
-  const routeElement = document.getElementById("shopping-route");
+
+function showShoppingList() {
+  const listElement = document.getElementById("shopping-list");
+  listElement.replaceChildren();
 
   if (shoppingList.length === 0) {
-    routeElement.innerHTML = "<li>Füge Produkte zu deiner Liste hinzu.</li>";
+    listElement.textContent = "Noch keine Produkte ausgewählt.";
     return;
   }
 
-  const routeAreas = shoppingList.map(function(productName) {
-    const product = products.find(function(item) {
-      return item.name === productName;
+  shoppingList.forEach(function(name) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "selected-product";
+    button.textContent = name + " ×";
+
+    button.addEventListener("click", function() {
+      removeProduct(name);
     });
 
-    return product.marketArea;
+    listElement.appendChild(button);
   });
-
-  const uniqueAreas = [...new Set(routeAreas)];
-
-  routeElement.innerHTML =
-    uniqueAreas.map(function(area) {
-      return "<li>" + area + "</li>";
-    }).join("") +
-    "<li>Kasse</li>";
 }
-function addProduct(product) {
-  if (!shoppingList.includes(product)) {
-    shoppingList.push(product);
-  }
-localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
-  document.getElementById("shopping-list").innerHTML =
-  shoppingList.map(function(product) {
-    return '<button type="button" class="selected-product" onclick="removeProduct(\'' + product + '\')">' +
-      product + ' ×</button>';
-  }).join("");
-}
-  function removeProduct(product) {
-  shoppingList = shoppingList.filter(function(item) {
-    return item !== product;
-  });
-localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
-  document.getElementById("shopping-list").innerHTML =
-    shoppingList.map(function(item) {
-      return '<button type="button" class="selected-product" onclick="removeProduct(\'' + item + '\')">' +
-        item + ' ×</button>';
-    }).join("");
-}
-  function clearShoppingList() {
-  shoppingList = [];
-  localStorage.removeItem("shoppingList");
 
-  document.getElementById("shopping-list").textContent =
-    "Noch keine Produkte ausgewählt.";
-    showShoppingRoute();
-}
-  function showStop() {
-    const stop = stops[currentStop];
+function buildRoute() {
+  stops = [];
 
-    document.querySelector(".next-stop").textContent = stop.area;
-    document.querySelector(".products").textContent = stop.products;
-
-    document.querySelectorAll(".zone").forEach(function (zone) {
-      zone.classList.remove("highlight");
+  marketZoneOrder.forEach(function(zone) {
+    const selectedProducts = products.filter(function(product) {
+      return product.zone === zone &&
+        shoppingList.includes(product.name);
     });
 
-    const activeZone = document.querySelector(
-      '[data-zone="' + stop.zone + '"]'
-    );
-
-    if (activeZone) {
-      activeZone.classList.add("highlight");
-    }
-  }
-
-  function nextStop() {
-    currentStop++;
-
-    if (currentStop >= stops.length) {
-      document.querySelector(".next-stop").textContent = "Einkauf abgeschlossen";
-      document.querySelector(".products").textContent =
-        "Deine Route endet an der Kasse.";
-      document.querySelector("button").textContent = "Fertig";
-
-      document.querySelectorAll(".zone").forEach(function (zone) {
-        zone.classList.remove("highlight");
+    if (selectedProducts.length > 0) {
+      stops.push({
+        area: selectedProducts[0].marketArea,
+        products: selectedProducts.map(function(product) {
+          return product.name;
+        }).join(" · "),
+        zone: zone
       });
-
-      return;
     }
-showShoppingRoute();
-    showStop();
+  });
+
+  if (stops.length > 0) {
+    stops.push({
+      area: "Kasse",
+      products: "Einkauf abschließen",
+      zone: "kasse"
+    });
   }
-document.getElementById("shopping-list").innerHTML =
-  shoppingList.map(function(product) {
-    return '<button type="button" class="selected-product" onclick="removeProduct(\'' + product + '\')">' +
-      product + ' ×</button>';
-  }).join("");
- showProductButtons(products);
-showShoppingList();
+}
+
+function showShoppingRoute() {
+  const routeElement = document.getElementById("shopping-route");
+  routeElement.replaceChildren();
+
+  if (stops.length === 0) {
+    const item = document.createElement("li");
+    item.textContent = "Füge Produkte zu deiner Liste hinzu.";
+    routeElement.appendChild(item);
+    return;
+  }
+
+  stops.forEach(function(stop) {
+    const item = document.createElement("li");
+    item.textContent = stop.area;
+    routeElement.appendChild(item);
+  });
+}
+
+function showStop() {
+  const title = document.querySelector(".next-stop");
+  const description = document.querySelector(".products");
+  const button = document.getElementById("next-stop-button");
+
+  document.querySelectorAll(".zone").forEach(function(zone) {
+    zone.classList.remove("highlight");
+  });
+
+  if (stops.length === 0) {
+    title.textContent = "Noch keine Route";
+    description.textContent =
+      "Wähle Produkte für deine Einkaufsliste aus.";
+    button.textContent = "Stopp erledigt";
+    button.disabled = true;
+    return;
+  }
+
+  if (currentStop >= stops.length) {
+    title.textContent = "Einkauf abgeschlossen";
+    description.textContent = "Deine Route endet an der Kasse.";
+    button.textContent = "Fertig";
+    button.disabled = true;
+    return;
+  }
+
+  const stop = stops[currentStop];
+
+  title.textContent = stop.area;
+  description.textContent = stop.products;
+  button.textContent = "Stopp erledigt";
+  button.disabled = false;
+
+  const activeZone = document.querySelector(
+    '[data-zone="' + stop.zone + '"]'
+  );
+
+  if (activeZone) {
+    activeZone.classList.add("highlight");
+  }
+}
+
+function refreshShopping() {
+  currentStop = 0;
+  buildRoute();
+  showShoppingList();
   showShoppingRoute();
   showStop();
+}
+
+function addProduct(name) {
+  if (shoppingList.includes(name)) {
+    return;
+  }
+
+  shoppingList.push(name);
+  saveShoppingList();
+  refreshShopping();
+}
+
+function removeProduct(name) {
+  shoppingList = shoppingList.filter(function(item) {
+    return item !== name;
+  });
+
+  saveShoppingList();
+  refreshShopping();
+}
+
+function clearShoppingList() {
+  shoppingList = [];
+  saveShoppingList();
+  refreshShopping();
+}
+
+function nextStop() {
+  if (currentStop < stops.length) {
+    currentStop++;
+    showStop();
+  }
+}
+
+function initializeMarketFinder() {
+  filterProducts();
+  refreshShopping();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener(
+    "DOMContentLoaded",
+    initializeMarketFinder,
+    { once: true }
+  );
+} else {
+  initializeMarketFinder();
+}
 </script>
 </body>
 </html>
