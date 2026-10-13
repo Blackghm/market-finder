@@ -284,47 +284,126 @@
 </section>
   </main>
 <script>
+// Produkte: unabhängig vom jeweiligen Supermarkt.
 const products = [
   {
+    id: "produkt-brot-001",
     name: "Körnerbrot",
-    category: "Brot und Backwaren",
-    marketArea: "Brot und Backwaren am Eingang",
-    zone: "brot"
+    category: "Brot und Backwaren"
   },
   {
+    id: "produkt-nudeln-001",
     name: "Spaghetti",
-    category: "Nudeln",
-    marketArea: "Nudeln und Konserven",
-    zone: "nudeln"
+    category: "Nudeln"
   },
   {
+    id: "produkt-obst-001",
     name: "Äpfel",
-    category: "Obst und Gemüse",
-    marketArea: "Obst und Gemüse hinten links",
-    zone: "obst"
+    category: "Obst und Gemüse"
   },
   {
+    id: "produkt-milch-001",
     name: "H-Milch 1,5 %",
-    category: "Milchprodukte",
-    marketArea: "Kühlregal an der Rückwand",
-    zone: "kuehlung"
+    category: "Milchprodukte"
   },
   {
+    id: "produkt-tiefkuehl-001",
     name: "Pizza",
-    category: "Tiefkühl",
-    marketArea: "Tiefkühlregal links vor der Kasse",
-    zone: "tiefkuehlung"
+    category: "Tiefkühl"
   }
 ];
 
-// Vorläufige Reihenfolge nur für diesen Beispielmarkt.
-const marketZoneOrder = [
-  "brot",
-  "nudeln",
-  "kuehlung",
-  "obst",
-  "tiefkuehlung"
+// Märkte: Bereiche und Reihenfolge gehören zum jeweiligen Markt.
+const markets = [
+  {
+    id: "demo-markt-001",
+    name: "Demo-Markt",
+    areas: [
+      {
+        id: "brot",
+        name: "Brot und Backwaren am Eingang"
+      },
+      {
+        id: "nudeln",
+        name: "Nudeln und Konserven"
+      },
+      {
+        id: "kuehlung",
+        name: "Kühlregal an der Rückwand"
+      },
+      {
+        id: "obst",
+        name: "Obst und Gemüse hinten links"
+      },
+      {
+        id: "tiefkuehlung",
+        name: "Tiefkühlregal links vor der Kasse"
+      }
+    ],
+    checkout: {
+      id: "kasse",
+      name: "Kasse"
+    }
+  }
 ];
+
+// Zuordnungen: Welches Produkt liegt in welchem Marktbereich?
+const productLocations = [
+  {
+    marketId: "demo-markt-001",
+    productId: "produkt-brot-001",
+    areaId: "brot"
+  },
+  {
+    marketId: "demo-markt-001",
+    productId: "produkt-nudeln-001",
+    areaId: "nudeln"
+  },
+  {
+    marketId: "demo-markt-001",
+    productId: "produkt-obst-001",
+    areaId: "obst"
+  },
+  {
+    marketId: "demo-markt-001",
+    productId: "produkt-milch-001",
+    areaId: "kuehlung"
+  },
+  {
+    marketId: "demo-markt-001",
+    productId: "produkt-tiefkuehl-001",
+    areaId: "tiefkuehlung"
+  }
+];
+
+const selectedMarketId = "demo-markt-001";
+
+function getSelectedMarket() {
+  return markets.find(function(market) {
+    return market.id === selectedMarketId;
+  });
+}
+
+function getProductArea(productId) {
+  const market = getSelectedMarket();
+
+  if (!market) {
+    return null;
+  }
+
+  const location = productLocations.find(function(item) {
+    return item.marketId === market.id &&
+      item.productId === productId;
+  });
+
+  if (!location) {
+    return null;
+  }
+
+  return market.areas.find(function(area) {
+    return area.id === location.areaId;
+  }) || null;
+}
 
 let shoppingList = [];
 let stops = [];
@@ -365,8 +444,10 @@ function showProductButtons(productList) {
   productList.forEach(function(product) {
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = "+ " + product.name + " · " + product.marketArea;
+   const area = getProductArea(product.id);
 
+button.textContent = "+ " + product.name + " · " +
+  (area ? area.name : "Standort noch nicht erfasst");
     button.addEventListener("click", function() {
       addProduct(product.name);
     });
@@ -422,28 +503,40 @@ function showShoppingList() {
 function buildRoute() {
   stops = [];
 
-  marketZoneOrder.forEach(function(zone) {
+  const market = getSelectedMarket();
+
+  if (!market) {
+    return;
+  }
+
+  market.areas.forEach(function(area) {
     const selectedProducts = products.filter(function(product) {
-      return product.zone === zone &&
-        shoppingList.includes(product.name);
+      if (!shoppingList.includes(product.name)) {
+        return false;
+      }
+
+      const productArea = getProductArea(product.id);
+
+      return productArea !== null &&
+        productArea.id === area.id;
     });
 
     if (selectedProducts.length > 0) {
       stops.push({
-        area: selectedProducts[0].marketArea,
+        area: area.name,
         products: selectedProducts.map(function(product) {
           return product.name;
         }).join(" · "),
-        zone: zone
+        zone: area.id
       });
     }
   });
 
   if (stops.length > 0) {
     stops.push({
-      area: "Kasse",
+      area: market.checkout.name,
       products: "Einkauf abschließen",
-      zone: "kasse"
+      zone: market.checkout.id
     });
   }
 }
