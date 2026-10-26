@@ -257,11 +257,6 @@
 <label for="category-filter">Produktkategorie auswählen:</label>
 <select id="category-filter" onchange="filterProducts()">
   <option value="Alle">Alle Kategorien</option>
-  <option value="Brot und Backwaren">Brot und Backwaren</option>
-  <option value="Nudeln">Nudeln</option>
-  <option value="Obst und Gemüse">Obst und Gemüse</option>
-  <option value="Milchprodukte">Milchprodukte</option>
-  <option value="Tiefkühl">Tiefkühl</option>
 </select>
  <div id="product-buttons" class="product-buttons"></div>
   <p id="no-products-message" class="no-products-message"></p>
@@ -490,7 +485,36 @@ button.textContent = "+ " + product.name + " · " +
     buttonArea.appendChild(button);
   });
 }
+function showCategoryOptions() {
+  const select = document.getElementById("category-filter");
+  const previousCategory = select.value;
 
+  select.replaceChildren();
+
+  const allOption = document.createElement("option");
+  allOption.value = "Alle";
+  allOption.textContent = "Alle Kategorien";
+  select.appendChild(allOption);
+
+  const categories = [...new Set(
+    products.map(function(product) {
+      return product.category;
+    })
+  )].sort(function(a, b) {
+    return a.localeCompare(b, "de");
+  });
+
+  categories.forEach(function(category) {
+    const option = document.createElement("option");
+    option.value = category;
+    option.textContent = category;
+    select.appendChild(option);
+  });
+
+  select.value = categories.includes(previousCategory)
+    ? previousCategory
+    : "Alle";
+}
 function filterProducts() {
   const selectedCategory =
     document.getElementById("category-filter").value;
@@ -689,10 +713,10 @@ function nextStop() {
 }
 
 function initializeMarketFinder() {
+  showCategoryOptions();
   filterProducts();
   refreshShopping();
 }
-
 if (document.readyState === "loading") {
   document.addEventListener(
     "DOMContentLoaded",
