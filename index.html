@@ -980,39 +980,13 @@ function initializeMarketSelection() {
   });
 }
 function initializeMarketFinder() {
-  function initializeMarketSelection() {
-  const select = document.getElementById("market-select");
-  select.replaceChildren();
-
-  markets.forEach(function(market) {
-    const option = document.createElement("option");
-    option.value = market.id;
-    option.textContent = market.name;
-    select.appendChild(option);
-  });
-
-  select.value = selectedMarketId;
-
-  select.addEventListener("change", function() {
-    changeMarket(select.value);
-  });
-}
+  initializeMarketSelection();
   showMarketSubtitle();
   showCategoryOptions();
   filterProducts();
   refreshShopping(true);
 }
-  const market = getSelectedMarket();
-  const subtitle = document.getElementById("market-subtitle");
 
-  subtitle.textContent = market
-    ? market.name + " · Deine Einkaufsroute"
-    : "Kein gültiger Markt ausgewählt";
-
-  showCategoryOptions();
-  filterProducts();
- refreshShopping(true);
-}
 if (document.readyState === "loading") {
   document.addEventListener(
     "DOMContentLoaded",
