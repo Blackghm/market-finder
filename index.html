@@ -221,7 +221,7 @@
 <body>
   <main>
     <h1>MarketFinder</h1>
-    <p class="subtitle">Demo-Markt · Deine Einkaufsroute</p>
+    <p id="market-subtitle" class="subtitle"></p>
 
     <section class="card">
       <div class="map" aria-label="Vereinfachte Marktkarte">
@@ -485,6 +485,11 @@ button.textContent = "+ " + product.name + " · " +
     buttonArea.appendChild(button);
   });
 }
+  function getMarketProducts() {
+  return products.filter(function(product) {
+    return getProductArea(product.id) !== null;
+  });
+}
 function showCategoryOptions() {
   const select = document.getElementById("category-filter");
   const previousCategory = select.value;
@@ -496,13 +501,13 @@ function showCategoryOptions() {
   allOption.textContent = "Alle Kategorien";
   select.appendChild(allOption);
 
-  const categories = [...new Set(
-    products.map(function(product) {
-      return product.category;
-    })
-  )].sort(function(a, b) {
-    return a.localeCompare(b, "de");
-  });
+const categories = [...new Set(
+  getMarketProducts().map(function(product) {
+    return product.category;
+  })
+)].sort(function(a, b) {
+  return a.localeCompare(b, "de");
+});
 
   categories.forEach(function(category) {
     const option = document.createElement("option");
@@ -522,7 +527,7 @@ function filterProducts() {
   const searchText =
     document.getElementById("product-search").value.trim().toLowerCase();
 
-  const filteredProducts = products.filter(function(product) {
+ const filteredProducts = getMarketProducts().filter(function(product) {
     const categoryMatches =
       selectedCategory === "Alle" ||
       product.category === selectedCategory;
@@ -713,6 +718,13 @@ function nextStop() {
 }
 
 function initializeMarketFinder() {
+  const market = getSelectedMarket();
+  const subtitle = document.getElementById("market-subtitle");
+
+  subtitle.textContent = market
+    ? market.name + " · Deine Einkaufsroute"
+    : "Kein gültiger Markt ausgewählt";
+
   showCategoryOptions();
   filterProducts();
   refreshShopping();
