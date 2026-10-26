@@ -420,7 +420,71 @@ function getProductArea(productId) {
 let shoppingList = [];
 let stops = [];
 let currentStop = 0;
+function getRouteSignature() {
+  return JSON.stringify({
+    marketId: selectedMarketId,
+    productIds: [...shoppingList].sort(),
+    stops: stops.map(function(stop) {
+      return {
+        zone: stop.zone,
+        products: stop.products
+      };
+    })
+  });
+}
 
+function saveRouteProgress() {
+  try {
+    if (stops.length === 0) {
+      localStorage.removeItem("shoppingRouteProgress");
+      return;
+    }
+
+    const savedProgress = {
+      version: 1,
+      signature: getRouteSignature(),
+      currentStop: currentStop
+    };
+
+    localStorage.setItem(
+      "shoppingRouteProgress",
+      JSON.stringify(savedProgress)
+    );
+  } catch (error) {
+    console.warn(
+      "Routenfortschritt konnte nicht gespeichert werden.",
+      error
+    );
+  }
+}
+
+function loadRouteProgress() {
+  currentStop = 0;
+
+  try {
+    const savedProgress = JSON.parse(
+      localStorage.getItem("shoppingRouteProgress")
+    );
+
+    if (
+      !savedProgress ||
+      savedProgress.version !== 1 ||
+      savedProgress.signature !== getRouteSignature() ||
+      !Number.isInteger(savedProgress.currentStop) ||
+      savedProgress.currentStop < 0 ||
+      savedProgress.currentStop > stops.length
+    ) {
+      return;
+    }
+
+    currentStop = savedProgress.currentStop;
+  } catch (error) {
+    console.warn(
+      "Routenfortschritt konnte nicht geladen werden.",
+      error
+    );
+  }
+}
 function saveShoppingList() {
   const savedData = {
     version: 2,
@@ -738,9 +802,15 @@ function showStop() {
   }
 }
 
-function refreshShopping() {
+function refreshShopping(restoreProgress = false) {
   currentStop = 0;
   buildRoute();
+
+  if (restoreProgress) {
+    loadRouteProgress();
+  }
+
+  saveRouteProgress();
   showShoppingList();
   showShoppingRoute();
   showStop();
@@ -774,10 +844,10 @@ function clearShoppingList() {
   saveShoppingList();
   refreshShopping();
 }
-
 function nextStop() {
   if (currentStop < stops.length) {
     currentStop++;
+    saveRouteProgress();
     showStop();
   }
 }
@@ -792,7 +862,7 @@ function initializeMarketFinder() {
 
   showCategoryOptions();
   filterProducts();
-  refreshShopping();
+ refreshShopping(true);
 }
 if (document.readyState === "loading") {
   document.addEventListener(
