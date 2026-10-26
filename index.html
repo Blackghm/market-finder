@@ -404,35 +404,86 @@ function getProductArea(productId) {
     return area.id === location.areaId;
   }) || null;
 }
-
 let shoppingList = [];
 let stops = [];
 let currentStop = 0;
 
-try {
-  const savedList = JSON.parse(localStorage.getItem("shoppingList"));
+// Neue Speicherung: Produkt-IDs in einer versionierten Struktur.
+function saveShoppingList() {
+  const productIds = shoppingList.map(function(name) {
+    const product = products.find(function(item) {
+      return item.name === name;
+    });
 
-  if (Array.isArray(savedList)) {
-    shoppingList = savedList.filter(function(name) {
-      return products.some(function(product) {
+    return product ? product.id : null;
+  }).filter(function(id) {
+    return id !== null;
+  });
+
+  const savedData = {
+    version: 2,
+    productIds: [...new Set(productIds)]
+  };
+
+  try {
+    localStorage.setItem(
+      "shoppingList",
+      JSON.stringify(savedData)
+    );
+  } catch (error) {
+    console.warn(
+      "Einkaufsliste konnte nicht gespeichert werden.",
+      error
+    );
+  }
+}
+
+// Alte Namenslisten und neue ID-Listen laden.
+try {
+  const savedData = JSON.parse(
+    localStorage.getItem("shoppingList")
+  );
+
+  let selectedProducts = [];
+
+  if (Array.isArray(savedData)) {
+    // Bisherige Speicherung mit Produktnamen übernehmen.
+    selectedProducts = savedData.map(function(name) {
+      return products.find(function(product) {
         return product.name === name;
       });
     });
+  } else if (
+    savedData &&
+    savedData.version === 2 &&
+    Array.isArray(savedData.productIds)
+  ) {
+    // Neue Speicherung mit Produkt-IDs lesen.
+    selectedProducts = savedData.productIds.map(function(id) {
+      return products.find(function(product) {
+        return product.id === id;
+      });
+    });
+  }
 
-    shoppingList = [...new Set(shoppingList)];
+  shoppingList = [...new Set(
+    selectedProducts.filter(function(product) {
+      return Boolean(product);
+    }).map(function(product) {
+      return product.name;
+    })
+  )];
+
+  // Erfolgreich geladene alte Daten ins neue Format übertragen.
+  if (Array.isArray(savedData)) {
+    saveShoppingList();
   }
 } catch (error) {
-  console.warn("Einkaufsliste konnte nicht geladen werden.", error);
+  console.warn(
+    "Einkaufsliste konnte nicht geladen werden.",
+    error
+  );
 }
-
-function saveShoppingList() {
-  try {
-    localStorage.setItem("shoppingList", JSON.stringify(shoppingList));
-  } catch (error) {
-    console.warn("Einkaufsliste konnte nicht gespeichert werden.", error);
-  }
-}
-
 function showProductButtons(productList) {
   const buttonArea = document.getElementById("product-buttons");
   const messageArea = document.getElementById("no-products-message");
