@@ -408,21 +408,10 @@ let shoppingList = [];
 let stops = [];
 let currentStop = 0;
 
-// Neue Speicherung: Produkt-IDs in einer versionierten Struktur.
 function saveShoppingList() {
-  const productIds = shoppingList.map(function(name) {
-    const product = products.find(function(item) {
-      return item.name === name;
-    });
-
-    return product ? product.id : null;
-  }).filter(function(id) {
-    return id !== null;
-  });
-
   const savedData = {
     version: 2,
-    productIds: [...new Set(productIds)]
+    productIds: [...new Set(shoppingList)]
   };
 
   try {
@@ -438,43 +427,38 @@ function saveShoppingList() {
   }
 }
 
-// Alte Namenslisten und neue ID-Listen laden.
 try {
   const savedData = JSON.parse(
     localStorage.getItem("shoppingList")
   );
 
-  let selectedProducts = [];
+  let loadedIds = [];
 
   if (Array.isArray(savedData)) {
-    // Bisherige Speicherung mit Produktnamen übernehmen.
-    selectedProducts = savedData.map(function(name) {
-      return products.find(function(product) {
-        return product.name === name;
+    // Auch ältere Listen mit Produktnamen übernehmen.
+    loadedIds = savedData.map(function(name) {
+      const product = products.find(function(item) {
+        return item.name === name;
       });
+
+      return product ? product.id : null;
     });
   } else if (
     savedData &&
     savedData.version === 2 &&
     Array.isArray(savedData.productIds)
   ) {
-    // Neue Speicherung mit Produkt-IDs lesen.
-    selectedProducts = savedData.productIds.map(function(id) {
-      return products.find(function(product) {
-        return product.id === id;
-      });
-    });
+    loadedIds = savedData.productIds;
   }
 
   shoppingList = [...new Set(
-    selectedProducts.filter(function(product) {
-      return Boolean(product);
-    }).map(function(product) {
-      return product.name;
+    loadedIds.filter(function(id) {
+      return products.some(function(product) {
+        return product.id === id;
+      });
     })
   )];
 
-  // Erfolgreich geladene alte Daten ins neue Format übertragen.
   if (Array.isArray(savedData)) {
     saveShoppingList();
   }
@@ -500,7 +484,7 @@ function showProductButtons(productList) {
 button.textContent = "+ " + product.name + " · " +
   (area ? area.name : "Standort noch nicht erfasst");
     button.addEventListener("click", function() {
-      addProduct(product.name);
+     addProduct(product.id);
     });
 
     buttonArea.appendChild(button);
@@ -537,14 +521,22 @@ function showShoppingList() {
     return;
   }
 
-  shoppingList.forEach(function(name) {
+  shoppingList.forEach(function(productId) {
+    const product = products.find(function(item) {
+      return item.id === productId;
+    });
+
+    if (!product) {
+      return;
+    }
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = "selected-product";
-    button.textContent = name + " ×";
+    button.textContent = product.name + " ×";
 
     button.addEventListener("click", function() {
-      removeProduct(name);
+      removeProduct(product.id);
     });
 
     listElement.appendChild(button);
@@ -562,7 +554,7 @@ function buildRoute() {
 
   market.areas.forEach(function(area) {
     const selectedProducts = products.filter(function(product) {
-      if (!shoppingList.includes(product.name)) {
+    if (!shoppingList.includes(product.id)) {
         return false;
       }
 
@@ -660,19 +652,23 @@ function refreshShopping() {
   showStop();
 }
 
-function addProduct(name) {
-  if (shoppingList.includes(name)) {
+function addProduct(productId) {
+  const productExists = products.some(function(product) {
+    return product.id === productId;
+  });
+
+  if (!productExists || shoppingList.includes(productId)) {
     return;
   }
 
-  shoppingList.push(name);
+  shoppingList.push(productId);
   saveShoppingList();
   refreshShopping();
 }
 
-function removeProduct(name) {
-  shoppingList = shoppingList.filter(function(item) {
-    return item !== name;
+function removeProduct(productId) {
+  shoppingList = shoppingList.filter(function(id) {
+    return id !== productId;
   });
 
   saveShoppingList();
