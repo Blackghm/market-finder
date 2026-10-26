@@ -231,13 +231,37 @@
   font-size: 14px;
   font-weight: bold;
 }
+    .market-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 16px 0;
+}
+
+.market-selection label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+#market-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  color: #1e293b;
+  font: inherit;
+}
   </style>
 </head>
 <body>
   <main>
     <h1>MarketFinder</h1>
     <p id="market-subtitle" class="subtitle"></p>
-
+<div class="market-selection">
+  <label for="market-select">Dein Markt</label>
+  <select id="market-select"></select>
+</div>
     <section class="card">
       <div class="map" aria-label="Vereinfachte Marktkarte">
         <div class="zone entrance" style="left: 41%; bottom: 1%; width: 20%; height: 10%;">Eingang</div>
@@ -389,8 +413,55 @@ const productLocations = [
   }
 ];
 
-const selectedMarketId = "demo-markt-001";
+// Zweiter Demo-Markt zum Testen der Marktauswahl.
+// Gleiche Demo-Bereiche, aber eine andere feste Besuchsreihenfolge.
+markets.push({
+  id: "demo-markt-002",
+  name: "Demo-Markt 2",
+  areas: [
+    { id: "obst", name: "Obst und Gemüse hinten links" },
+    { id: "brot", name: "Brot und Backwaren am Eingang" },
+    { id: "nudeln", name: "Nudeln und Konserven" },
+    { id: "kuehlung", name: "Kühlregal an der Rückwand" },
+    {
+      id: "tiefkuehlung",
+      name: "Tiefkühlregal links vor der Kasse"
+    }
+  ],
+  checkout: {
+    id: "kasse",
+    name: "Kasse"
+  }
+});
 
+// Für den Test liegen die Produkte in denselben Demo-Bereichen.
+const secondMarketLocations = productLocations
+  .filter(function(location) {
+    return location.marketId === "demo-markt-001";
+  })
+  .map(function(location) {
+    return {
+      marketId: "demo-markt-002",
+      productId: location.productId,
+      areaId: location.areaId
+    };
+  });
+
+productLocations.push(...secondMarketLocations);
+
+let selectedMarketId = "demo-markt-001";
+
+try {
+  const savedMarketId = localStorage.getItem("selectedMarketId");
+
+  if (markets.some(function(market) {
+    return market.id === savedMarketId;
+  })) {
+    selectedMarketId = savedMarketId;
+  }
+} catch (error) {
+  console.warn("Marktauswahl konnte nicht geladen werden.", error);
+}
 function getSelectedMarket() {
   return markets.find(function(market) {
     return market.id === selectedMarketId;
@@ -851,8 +922,70 @@ function nextStop() {
     showStop();
   }
 }
+function showMarketSubtitle() {
+  const market = getSelectedMarket();
+  const subtitle = document.getElementById("market-subtitle");
 
+  subtitle.textContent = market
+    ? market.name + " · Deine Einkaufsroute"
+    : "Kein gültiger Markt ausgewählt";
+}
+
+function changeMarket(marketId) {
+  const marketExists = markets.some(function(market) {
+    return market.id === marketId;
+  });
+
+  if (!marketExists || marketId === selectedMarketId) {
+    return;
+  }
+
+  selectedMarketId = marketId;
+
+  try {
+    localStorage.setItem("selectedMarketId", selectedMarketId);
+  } catch (error) {
+    console.warn(
+      "Marktauswahl konnte nicht gespeichert werden.",
+      error
+    );
+  }
+
+  document.getElementById("product-search").value = "";
+  document.getElementById("category-filter").value = "Alle";
+
+  showMarketSubtitle();
+  showCategoryOptions();
+  filterProducts();
+
+  // Einkaufsliste behalten, Route im neuen Markt neu beginnen.
+  refreshShopping();
+}
+
+function initializeMarketSelection() {
+  const select = document.getElementById("market-select");
+  select.replaceChildren();
+
+  markets.forEach(function(market) {
+    const option = document.createElement("option");
+    option.value = market.id;
+    option.textContent = market.name;
+    select.appendChild(option);
+  });
+
+  select.value = selectedMarketId;
+
+  select.addEventListener("change", function() {
+    changeMarket(select.value);
+  });
+}
 function initializeMarketFinder() {
+  initializeMarketSelection();
+  showMarketSubtitle();
+  showCategoryOptions();
+  filterProducts();
+  refreshShopping(true);
+}
   const market = getSelectedMarket();
   const subtitle = document.getElementById("market-subtitle");
 
