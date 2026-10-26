@@ -216,6 +216,15 @@
   margin-bottom: 0;
   padding-left: 22px;
 }
+    #route-warning {
+  margin: 14px 0 0;
+  padding: 12px;
+  border: 1px solid #e3b34b;
+  border-radius: 8px;
+  background: #fff7df;
+  color: #704c00;
+  line-height: 1.5;
+}
   </style>
 </head>
 <body>
@@ -266,7 +275,8 @@
   <div class="route-box">
   <h2>Deine Route</h2>
   <ol id="shopping-route"></ol>
-</div>
+<p id="route-warning" role="status" hidden></p>
+  </div>
 </section>
 
 <section class="card">
@@ -616,11 +626,41 @@ function buildRoute() {
 
 function showShoppingRoute() {
   const routeElement = document.getElementById("shopping-route");
+  const warningElement = document.getElementById("route-warning");
+
   routeElement.replaceChildren();
+  warningElement.textContent = "";
+  warningElement.hidden = true;
+
+  const missingProducts = shoppingList.map(function(productId) {
+    return products.find(function(product) {
+      return product.id === productId;
+    });
+  }).filter(function(product) {
+    return product && getProductArea(product.id) === null;
+  });
+
+  if (missingProducts.length > 0) {
+    const missingNames = missingProducts.map(function(product) {
+      return product.name;
+    }).join(" · ");
+
+    warningElement.textContent =
+      "Für diese Produkte ist im ausgewählten Markt noch kein " +
+      "Standort erfasst: " + missingNames +
+      ". Sie bleiben auf deiner Einkaufsliste, sind aber nicht " +
+      "in der Route enthalten.";
+
+    warningElement.hidden = false;
+  }
 
   if (stops.length === 0) {
     const item = document.createElement("li");
-    item.textContent = "Füge Produkte zu deiner Liste hinzu.";
+
+    item.textContent = shoppingList.length === 0
+      ? "Füge Produkte zu deiner Liste hinzu."
+      : "Für deine Auswahl kann noch keine Route angezeigt werden.";
+
     routeElement.appendChild(item);
     return;
   }
@@ -631,7 +671,6 @@ function showShoppingRoute() {
     routeElement.appendChild(item);
   });
 }
-
 function showStop() {
   const title = document.querySelector(".next-stop");
   const description = document.querySelector(".products");
