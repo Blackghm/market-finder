@@ -225,6 +225,12 @@
   color: #704c00;
   line-height: 1.5;
 }
+    .route-progress {
+  margin: 4px 0 10px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: bold;
+}
   </style>
 </head>
 <body>
@@ -281,6 +287,7 @@
 
 <section class="card">
   <span class="route-label">Nächster Stopp</span>
+  <p id="route-progress" class="route-progress" role="status"></p>
   <h2 class="next-stop">Noch keine Route</h2>
   <p class="products">Wähle Produkte für deine Einkaufsliste aus.</p>
   <button id="next-stop-button" type="button" onclick="nextStop()" disabled>
@@ -671,7 +678,25 @@ function showShoppingRoute() {
     routeElement.appendChild(item);
   });
 }
+ function showRouteProgress() {
+  const progress = document.getElementById("route-progress");
+
+  if (stops.length === 0) {
+    progress.textContent = "Keine aktive Route";
+    return;
+  }
+
+  if (currentStop >= stops.length) {
+    progress.textContent =
+      "Alle " + stops.length + " Routenstopps erledigt";
+    return;
+  }
+
+  progress.textContent =
+    "Stopp " + (currentStop + 1) + " von " + stops.length;
+} 
 function showStop() {
+  showRouteProgress();
   const title = document.querySelector(".next-stop");
   const description = document.querySelector(".products");
   const button = document.getElementById("next-stop-button");
